@@ -65,11 +65,14 @@ module SparkPostRails
 
     def prepare_addresses emails, names
       emails = [emails] unless emails.is_a?(Array)
-      header_to = emails.join(",")
-      emails.each_with_index.map {|email, index| prepare_address(email, index, names, header_to) }
+
+      # This is pure evil when sending a non-transactional email. It means all the recipients can see each other's emails!
+      # Until sparkpost_rails decides this is something that you should opt into, I'm just removing it.
+      # header_to = emails.join(",")
+      emails.each_with_index.map {|email, index| prepare_address(email, index, names) }
     end
 
-    def prepare_address email, index, names, header_to
+    def prepare_address email, index, names, header_to = nil
       if !names[index].nil?
         { address:  { email: email, name: names[index], header_to: header_to } }
       else
@@ -77,12 +80,12 @@ module SparkPostRails
       end
     end
 
-    def prepare_copy_addresses emails, names, header_to
+    def prepare_copy_addresses emails, names, header_to = nil
       emails = [emails] unless emails.is_a?(Array)
       emails.each_with_index.map {|email, index| prepare_copy_address(email, index, names, header_to) }
     end
 
-    def prepare_copy_address email, index, names, header_to
+    def prepare_copy_address email, index, names, header_to = nil
       if !names[index].nil? && !header_to.nil?
         { address:  { email: email, name: names[index], header_to: header_to } }
       elsif !names[index].nil?
